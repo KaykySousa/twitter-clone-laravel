@@ -2,7 +2,7 @@
 
 
 use App\Models\TwitterUsers; 
-// use App\Models\TwitterPosts; 
+use App\Models\TwitterPosts; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +21,8 @@ use Illuminate\Support\Facades\Route;
 // app routes
 
 Route::get('/', function () {
-    return view('main');
+    $posts = TwitterPosts::with('user')->get();
+    return view('main', ["posts" => $posts]);
 });
 
 Route::get('/register', function () {
@@ -52,11 +53,21 @@ Route::post('/users', function (Request $request) {
 
 Route::post('/login', function (Request $request) {
     $user = TwitterUsers::where('email', $request->email)->first();
-    
+
     if ($user->password == $request->password) {
-    // $posts = TwitterPosts::all();
-        return view('main');
+        Cookie::queue('twitter-token', $user->id);
+        return redirect('/');
     } else {
         return redirect('/login');
     }
+});
+
+// tweets
+Route::post('/tweet', function (Request $request) {
+    TwitterPosts::create([
+        'text' => $request->text,
+        'user_id' => Cookie::get('twitter-token'),
+    ]);
+
+    return redirect('/');
 });

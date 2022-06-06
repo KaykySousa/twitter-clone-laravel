@@ -12,6 +12,6 @@ class TwitterUsers extends Model
     protected $fillable = ['name', 'username', 'email', 'password'];
 
     public function posts() {
-        return $this->hasMany(TwitterPosts::class, 'user_id');
+        return $this->hasMany('App\Models\TwitterPosts', 'user_id');
     }
 }
